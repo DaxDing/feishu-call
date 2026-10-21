@@ -17,7 +17,7 @@ allowed-tools: ["Bash", "Read"]
 ```bash
 feishu --self-check --json          # 凭证、网络、bot 与 user 身份是否就绪
 feishu auth ensure [DOMAIN]         # 跑 user 身份命令前调一次：有效秒退，待刷新自动续期，失效在后台自动授权
-feishu {domain} +{action} …         # 快捷命令，如 feishu base +record-list、feishu sheets +read
+feishu {domain} +{action} …         # 快捷命令，如 feishu base +record-list、feishu sheets +csv-get
 feishu api GET /open-apis/…         # 快捷命令覆盖不到时直调开放平台 API
 ```
 
@@ -32,7 +32,7 @@ feishu api GET /open-apis/…         # 快捷命令覆盖不到时直调开放�
   Wiki      feishu.cn/wiki/{wiki_token}
   ```
 
-  sheets、docs 的快捷命令可以直接传 `--url`，base 不行。
+  sheets 的快捷命令传 `--url`（表格或 wiki 链接都行），docs 传 `--doc`；base 不接链接，要拆出 token。命令名随 lark-cli 版本变，报 unknown subcommand 就看 `feishu {domain} --help`。
 
 ## 红线
 

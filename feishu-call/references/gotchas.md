@@ -22,11 +22,11 @@
 
 ## 电子表格
 
-- range 写完整的 `{sheet_id}!A1:D10`，或者 `--sheet-id` 单独传，range 只写 `A1:D10`。
-- `+read` / `+write` / `+append` / `+find` 都能直接传 `--url`。
-- `+write` / `+append` 只写值，样式用 `+set-style` / `+batch-set-style`。
-- `+write` 写单个格子（如 `B7:B7`）可能报 90215 sheetId not found，改用完整 range。`+append` 必须给完整 range（`A3:J12`），只写 `A3` 会报错。
-- 默认返回格式化后的文本；要原始数值传 `UnformattedValue`，要公式传 `Formula`。
+- 旧的 `+read` / `+write` / `+append` / `+find` 已从 lark-cli 删除（报 unknown subcommand）。读用 `+cells-get`（值、公式、样式）或 `+csv-get`（读成 CSV，`--range` 可省，省了读整页）；写用 `+cells-set` / `+csv-put`；查找用 `+cells-search`；样式用 `+cells-set-style` / `+cells-batch-set-style`。命令名随版本变，以 `feishu sheets --help` 为准。
+- 选页必须传 `--sheet-id`（链接里 `sheet=` 的值）或 `--sheet-name`，二选一；`--range` 只写 `A1:D10`，不带 sheet 前缀。
+- `--url` 可以传表格链接，也可以直接传 wiki 链接，不用先查 `obj_token`。
+- 要公式而不是计算结果：`+cells-get --include formula`。
+- 大表加 `--output-path ./out.json` 落盘，看回执里的 `complete` 判断是否读全，不要只看 stdout。
 
 ## 消息
 
@@ -43,10 +43,9 @@
 
 ## 文档
 
-- `docs +fetch` / `+update` 默认走的 v1 已弃用，返回里会带 deprecated 警告；新写法加 `--api-version v2`。
-- `--mode overwrite` 整篇替换，`append` 追加到末尾；局部修改用 `replace_range` / `insert_before` / `insert_after` / `delete_range`，配合 `--selection-by-title` 或 `--selection-with-ellipsis` 定位。
-- 长 markdown 用 `--markdown -` 从 stdin 读，配 heredoc，免去转义。
-- `--new-title ""` 会被当成「不改标题」，要重置标题得传非空值；清空正文传一个空格 `--markdown " "`。
+- 文档用 `--doc` 传链接或 token（不是 `--url`）。`+fetch --scope outline` 先看目录，再按 `section` / `keyword` 读局部，长文不用整篇拉。
+- `+update --command` 选操作：局部改用 `str_replace`（配 `--pattern`）或 `block_*`（先 `+fetch --detail with-ids` 拿 block id）；`append` 追加到末尾；`overwrite` 整篇替换，会丢掉无关的富文本，只在确实要整篇重写时用。
+- `--content` 默认是 DocxXML；直接写 Markdown 加 `--doc-format markdown`。
 
 ## 通讯录
 
@@ -59,6 +58,6 @@
 
 ## 通用
 
-- 快捷命令带 `+` 前缀（`+record-list`、`+read`）。漏了 `+` 会打出 lark-cli 的帮助列表，看着像「没装这个域」，其实只是命令写错了。
+- 快捷命令带 `+` 前缀（`+record-list`、`+csv-get`）。漏了 `+` 会打出 lark-cli 的帮助列表，看着像「没装这个域」，其实只是命令写错了。
 - 不确定参数时加 `--dry-run` 看实际请求体。
 - `--page-all` 只有部分 sheets / im / wiki 命令支持，其余手动 `--limit` + `--offset` 循环，可加 `--page-delay 500` 降低频率。
