@@ -6,9 +6,11 @@
 
 ## 准备
 
-- macOS（其他系统没验证过）。
-- Node.js、jq、uv、Google Chrome，缺什么安装脚本会告诉你怎么装。
-- 一个飞书账号。安装时会用它创建一个**只属于你自己的飞书应用**，不需要别人的 App Secret。公司如果不允许员工自己建应用，找管理员开通，或者请管理员给你一个现成应用的 App ID / App Secret。
+- **系统**：macOS（其他系统没验证过）。
+- **先装好**：[Homebrew](https://brew.sh) 和 git（`brew install git`）。其余依赖由安装脚本检查，缺了会给出安装命令。
+- **其余依赖**：Node.js、jq、uv、Google Chrome，以及飞书官方的 `lark-cli`（`npm i -g @larksuite/cli`）。Chrome 用来扫码登录和自动续期，必须是正式版 Google Chrome。
+- **飞书账号**：只支持国内版飞书（feishu.cn），不支持海外版 Lark。安装时会用这个账号创建一个**只属于你自己的飞书应用**，不需要别人的 App Secret；已有应用也可以直接选它。公司如果不允许员工自己建应用，找管理员开通，或者请管理员给你一个现成应用的 App ID / App Secret。
+- **网络**：能访问 `open.feishu.cn`、`accounts.feishu.cn`、GitHub 和 npm。
 
 ## 安装：一句话交给 AI
 
@@ -64,7 +66,7 @@
      feishu init --new > "${TMPDIR:-/tmp}/feishu-init.log" 2>&1 &
      ```
 
-     几秒后从日志里取出 `https://open.feishu.cn/page/cli?…` 这条链接发给用户，请用户用电脑浏览器打开，用飞书 App 扫页面上的码，按提示创建应用。等这个后台命令自己退出、退出码为 0，再继续。
+     几秒后从日志里取出 `https://open.feishu.cn/page/cli?…` 这条链接发给用户，请用户用电脑浏览器打开：没登录飞书的话先用飞书 App 扫码登录，然后在「创建飞书 CLI 应用」页面点「创建」；已经有应用的点「选择已有应用」。等这个后台命令自己退出、退出码为 0，再继续。
 
 5. 登录（第二次扫码）：
 
@@ -85,7 +87,7 @@
 
 ### 手动安装
 
-不用 AI 的话，在终端里按上面第 1–6 步执行。`feishu init --new` 会直接在终端里显示二维码，不用放后台。
+不用 AI 的话，在终端里按上面第 1–6 步执行。`feishu init --new` 不用放后台：终端里会显示二维码和链接，用飞书 App 扫码或在电脑浏览器打开链接，再点「创建」或「选择已有应用」。
 
 ## 登录怎么一直保持
 
@@ -117,7 +119,8 @@ feishu api GET /open-apis/calendar/v4/calendars          # 快捷命令没覆盖
 ## 常见问题
 
 - **提示权限不足 / scope 没开通**：这不是登录过期。到 [飞书开放平台](https://open.feishu.cn/app) 找到你的应用，在「权限管理」里开通对应权限并发布新版本，再跑一次 `feishu auth bootstrap` 重新授权。
-- **公司不让建应用**：请管理员给你一个现成应用的 App ID / App Secret，用 `feishu init` 代替 `feishu init --new`。
+- **公司不让建应用**：请管理员给你一个现成应用的 App ID / App Secret，用 `feishu init` 代替 `feishu init --new`；或者在创建页面点「选择已有应用」。
+- **用的是海外版 Lark**：暂不支持，扫码登录只认 feishu.cn。
 - **自动授权失败**：失败时的截图在 `~/.local/state/feishu/screenshots/`；照提示重跑 `feishu auth bootstrap` 即可。
 - **更新**：`git -C ~/.local/share/feishu-call pull`。
 - **卸载**：删掉 `~/.local/bin/feishu`、`~/.claude/skills/feishu-call`、`~/.codex/skills/feishu-call` 这几个软链和 `~/.local/share/feishu-call`；登录状态在 `~/.local/state/feishu/`。
