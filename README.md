@@ -20,7 +20,7 @@
 请安装飞书 skill：按 https://github.com/DaxDing/feishu-call 的 README「AI 安装步骤」操作
 ```
 
-中途 AI 会请你**扫两次码**：第一次创建你的飞书应用，第二次登录。之后直接对 AI 说「读一下这个多维表格 <链接>」就行，不用再登录。更多说法见 [examples/prompts.md](examples/prompts.md)。
+中途 AI 会请你**扫两次码**：第一次创建你的飞书应用，第二次登录；两次之间还要你在飞书开放平台网页上导入一份权限清单（复制粘贴，一分钟）。之后直接对 AI 说「读一下这个多维表格 <链接>」就行，不用再登录。更多说法见 [examples/prompts.md](examples/prompts.md)。
 
 ### AI 安装步骤
 
@@ -50,7 +50,7 @@
    feishu --self-check --json
    ```
 
-   `checks.credentials.ok` 为 `true` 就跳到第 5 步，否则做第 4 步。
+   `checks.credentials.ok` 为 `true` 说明已有应用，跳到第 5 步；否则做第 4 步。
 
 4. 创建应用（第一次扫码）：
 
@@ -68,7 +68,16 @@
 
      几秒后从日志里取出 `https://open.feishu.cn/page/cli?…` 这条链接发给用户，请用户用电脑浏览器打开：没登录飞书的话先用飞书 App 扫码登录，然后在「创建飞书 CLI 应用」页面点「创建」；已经有应用的点「选择已有应用」。等这个后台命令自己退出、退出码为 0，再继续。
 
-5. 登录（第二次扫码）：
+5. 开权限（在登录之前做，登录时才会一并授权）：新建的应用默认权限很少。仓库里的 [`scopes.json`](scopes.json) 是维护者日常在用的整套权限，导入后能力和维护者一致。这一步只能用户在网页上操作，你把步骤和文件内容交给用户：
+
+   1. 打开 <https://open.feishu.cn/app>，进入刚创建的应用。
+   2. 左侧「权限管理」→「批量处理」→「批量导入/导出权限」→「导入」，把 `scopes.json` 的全部内容粘贴进去，点「下一步，确认新增权限」。
+   3. 左侧「添加应用能力」里添加「机器人」（以机器人身份发消息要用）。
+   4. 左侧「版本管理与发布」→ 创建版本并发布。企业版飞书可能要管理员审核，审核通过才生效；用不上的权限可以先从 JSON 里删掉再导入。
+
+   以后再补权限也是同样的路径，补完要重跑一次 `feishu auth bootstrap` 重新授权。
+
+6. 登录（第二次扫码）：
 
    ```bash
    feishu auth bootstrap
@@ -76,7 +85,7 @@
 
    它会打开一个专用的 Chrome 窗口，请用户在窗口里用飞书 App 扫码登录；之后的授权确认会自动点掉，最多等 5 分钟。
 
-6. 验证：
+7. 验证：
 
    ```bash
    feishu --self-check --json
@@ -87,7 +96,7 @@
 
 ### 手动安装
 
-不用 AI 的话，在终端里按上面第 1–6 步执行。`feishu init --new` 不用放后台：终端里会显示二维码和链接，用飞书 App 扫码或在电脑浏览器打开链接，再点「创建」或「选择已有应用」。
+不用 AI 的话，在终端里按上面第 1–7 步执行。`feishu init --new` 不用放后台：终端里会显示二维码和链接，用飞书 App 扫码或在电脑浏览器打开链接，再点「创建」或「选择已有应用」。
 
 ## 登录怎么一直保持
 
@@ -118,7 +127,7 @@ feishu api GET /open-apis/calendar/v4/calendars          # 快捷命令没覆盖
 
 ## 常见问题
 
-- **提示权限不足 / scope 没开通**：这不是登录过期。到 [飞书开放平台](https://open.feishu.cn/app) 找到你的应用，在「权限管理」里开通对应权限并发布新版本，再跑一次 `feishu auth bootstrap` 重新授权。
+- **提示权限不足 / scope 没开通**：这不是登录过期。按「AI 安装步骤」第 5 步导入 `scopes.json`（或单独开通缺的那项）并发布新版本，再跑一次 `feishu auth bootstrap` 重新授权。
 - **公司不让建应用**：请管理员给你一个现成应用的 App ID / App Secret，用 `feishu init` 代替 `feishu init --new`；或者在创建页面点「选择已有应用」。
 - **用的是海外版 Lark**：暂不支持，扫码登录只认 feishu.cn。
 - **自动授权失败**：失败时的截图在 `~/.local/state/feishu/screenshots/`；照提示重跑 `feishu auth bootstrap` 即可。
@@ -133,6 +142,7 @@ feishu api GET /open-apis/calendar/v4/calendars          # 快捷命令没覆盖
 | `feishu_cli/` | `feishu` 命令：`bin/feishu` 入口，`cli/auth_browser.py` 负责扫码登录和自动授权 |
 | `lib/` | 命令用到的凭证加载、uv 运行脚本 |
 | `install.sh` | 安装脚本，只建软链、检查依赖 |
+| `scopes.json` | 维护者在用的整套权限，在飞书开放平台批量导入 |
 | `examples/prompts.md` | 可以直接对 AI 说的话 |
 
 ## License
